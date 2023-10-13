@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist</title>
+</head>
+<body>
+    <label>Product id: </label>
+    <input type="text" name="product_id" id="product_id">
+    <label>Product handle: </label>
+    <input type="text" name="product_handle" id="product_handle">
+    <button id="send">Send</button>
+
+    <ul id="wishlist">
+
+    </ul>
+
+    <script>
+        document.getElementById('send').addEventListener('click', () => {
+            const product_id = document.getElementById('product_id').value;
+            const product_handle = document.getElementById('product_handle').value;
+            var new_product = {
+                productId: product_id,
+                productHandle: product_handle
+            };
+            fetch('/add-to-wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(new_product)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('wishlist').innerHTML = '';
+                loadwishlist();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function loadwishlist(){
+            fetch('/get',{
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const wishlistHtml = document.getElementById('wishlist');
+                Object.entries(data).forEach(([key, items]) => {
+                    items.forEach((item, index) => {
+                        const productHandle = item.product_handle;
+                        const productID = item.product_id;
+                        const listItem = document.createElement('li');
+                        listItem.classList.add('wishlist_item');
+                        listItem.innerHTML = `<div class="product-info"><p>${productID}</p><p>${productHandle}</p></div>`;
+                        wishlistHtml.appendChild(listItem);
+                    });
+                    });
+              
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        loadwishlist();
+    </script>
+</body>
+</html>
